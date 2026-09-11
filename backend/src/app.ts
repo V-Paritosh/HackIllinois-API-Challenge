@@ -18,7 +18,11 @@ app.get("/api/health", (_request, response) => response.json({ ok: true }));
 app.use("/api/shifts", shiftRouter);
 app.use("/api/volunteers", volunteerRouter);
 app.use("/api", signupRouter);
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
+app.use(
+  "/api/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(openApiDocument, { customCss: "" }),
+);
 app.use((_request, _response, next) => next(new AppError(404, "NotFound", "Route not found.")));
 app.use(errorHandler);
 export default app;
