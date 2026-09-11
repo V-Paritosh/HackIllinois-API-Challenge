@@ -9,7 +9,9 @@ import volunteerRouter from "./services/volunteer/volunteer-router.js";
 import { openApiDocument } from "./openapi.js";
 
 const app = express();
-app.use(cors({ origin: process.env.FRONTEND_URL ?? "http://localhost:3000" }));
+if (process.env.FRONTEND_URL) {
+  app.use(cors({ origin: process.env.FRONTEND_URL }));
+}
 app.use(express.json());
 app.use(morgan("dev"));
 app.get("/api/health", (_request, response) => response.json({ ok: true }));

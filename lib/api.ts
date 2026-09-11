@@ -1,4 +1,4 @@
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:4000/api";
+const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "/api";
 
 export type Shift = {
   id: string;
@@ -81,11 +81,7 @@ export async function listShifts() {
 export async function listVolunteers() {
   return request<(Volunteer & { signupCount: number })[]>("/volunteers");
 }
-export async function createVolunteer(input: {
-  name: string;
-  email: string;
-  phone?: string;
-}) {
+export async function createVolunteer(input: { name: string; email: string; phone?: string }) {
   return request<Volunteer>("/volunteers", {
     method: "POST",
     body: JSON.stringify(input),
