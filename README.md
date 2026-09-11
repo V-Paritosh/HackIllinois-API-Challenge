@@ -251,23 +251,3 @@ cd backend
 npm test
 npm run build
 ```
-
-## Key Learnings
-
-- TypeScript and Zod solve different problems: static contracts help during development, while Zod protects runtime API boundaries.
-- A separate signup collection makes the volunteer-to-shift relationship explicit and allows a database-level duplicate guarantee.
-- Normalizing email before lookup gives the self-service flow a stable volunteer identity without requiring authentication.
-- Derived capacity fields should be calculated from signup records rather than duplicated counters that can drift.
-- A simple service-level capacity check is easy to read, but concurrent reservations require database-level concurrency control.
-- MongoDB transactions can preserve capacity and signup consistency when multiple requests compete for the same shift.
-- Centralized error handling keeps route behavior predictable for both the frontend and API consumers.
-
-## Future Improvements
-
-- Add authentication and role-based authorization for organizer endpoints
-- Consider replacing the temporary `Shift` write used for transaction serialization with a dedicated reservation or counter design at larger scale
-- Add email confirmation and cancellation notifications
-- Add pagination metadata and richer shift filtering
-- Add rate limiting and request tracing for public signup endpoints
-- Expand integration tests around concurrent signups and deletion cascades
-- Add production deployment configuration and observability
