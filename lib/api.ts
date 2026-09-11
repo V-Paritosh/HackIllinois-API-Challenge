@@ -1,7 +1,6 @@
 const configuredApiUrl = process.env["NEXT_PUBLIC_API_URL"];
 const API_URL =
-  typeof window !== "undefined" &&
-  !["localhost", "127.0.0.1"].includes(window.location.hostname)
+  typeof window !== "undefined" && !["localhost", "127.0.0.1"].includes(window.location.hostname)
     ? "/api"
     : (configuredApiUrl ?? "/api");
 
