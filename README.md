@@ -193,6 +193,20 @@ npm run seed
 
 The seed command clears and recreates volunteers, shifts, and signups. It is never run automatically by the server.
 
+### Seed the deployed database
+
+Netlify deploys the application code, but the seed records must be inserted into the MongoDB Atlas database separately. Run the existing seed command once from your local repository, using the same Atlas connection string configured in Netlify:
+
+```powershell
+cd backend
+npm install
+$env:MONGODB_URI="mongodb+srv://<user>:<password>@<cluster>/<database>?retryWrites=true&w=majority"
+npm run seed
+Remove-Item Env:MONGODB_URI
+```
+
+This command deletes and recreates all volunteers, shifts, and signups in that database. Do not add it to the Netlify build command or run it against a database containing data you need to keep. After it completes, redeploying the site is not necessary; the deployed API will read the seeded Atlas data through `MONGODB_URI`.
+
 ## Netlify Deployment
 
 The repository deploys as one Netlify site. Next.js serves the frontend, and the rewrite in `netlify.toml` sends `/api/*` requests to `netlify/functions/api.ts`. That function connects to MongoDB and wraps the existing Express app from `backend/src/app.ts`; the backend routes are not duplicated.
