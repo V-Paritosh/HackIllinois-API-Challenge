@@ -11,5 +11,6 @@ const shiftSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+shiftSchema.index({ startTime: 1 });
 
 export const Shift = mongoose.model("Shift", shiftSchema);

@@ -53,7 +53,33 @@ export async function listShifts(query: Record<string, unknown>) {
     .sort({ startTime: 1 })
     .skip((parsed.page - 1) * parsed.limit)
     .limit(parsed.limit);
-  return Promise.all(shifts.map(shiftView));
+  const signupCounts = await Signup.aggregate<{ _id: mongoose.Types.ObjectId; count: number }>([
+    { $match: { shiftId: { $in: shifts.map((shift) => shift._id) } } },
+    { $group: { _id: "$shiftId", count: { $sum: 1 } } },
+  ]);
+  const countsByShiftId = new Map(
+    signupCounts.map(({ _id, count }) => [_id.toString(), count]),
+  );
+
+  return shifts.map((shift) => {
+    const value = asShift(shift);
+    const signupCount = countsByShiftId.get(value._id.toString()) ?? 0;
+    return {
+      id: value._id.toString(),
+      title: value.title,
+      description: value.description ?? "",
+      location: value.location ?? "",
+      startTime: value.startTime.toISOString(),
+      endTime: value.endTime.toISOString(),
+      capacity: value.capacity,
+      signupCount,
+      remainingSpots: Math.max(0, value.capacity - signupCount),
+      status: availability(signupCount, value.capacity),
+      date: value.startTime.toISOString().slice(0, 10),
+      startTimeLocal: value.startTime.toISOString().slice(11, 16),
+      endTimeLocal: value.endTime.toISOString().slice(11, 16),
+    };
+  });
 }
 
 export async function getShift(value: string) {

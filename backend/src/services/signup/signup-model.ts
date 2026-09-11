@@ -8,5 +8,6 @@ const signupSchema = new mongoose.Schema(
   { timestamps: { createdAt: true, updatedAt: false } },
 );
 signupSchema.index({ volunteerId: 1, shiftId: 1 }, { unique: true });
+signupSchema.index({ shiftId: 1 });
 
 export const Signup = mongoose.model("Signup", signupSchema);
