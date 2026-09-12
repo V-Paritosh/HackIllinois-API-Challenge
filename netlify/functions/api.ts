@@ -3,12 +3,28 @@ import app from "../../backend/src/app.js";
 import { connectDatabase } from "../../backend/src/database.js";
 
 const expressHandler = serverless(app);
-type NetlifyEvent = Parameters<typeof expressHandler>[0] & {
+type LegacyNetlifyEvent = Parameters<typeof expressHandler>[0] & {
   body?: unknown;
   isBase64Encoded?: boolean | string;
 };
+type NetlifyEvent = LegacyNetlifyEvent | Request;
 
-const normalizeEventBody = (event: NetlifyEvent) => {
+const isRequest = (event: NetlifyEvent): event is Request =>
+  typeof Request !== "undefined" && event instanceof Request;
+
+const normalizeEventBody = async (event: NetlifyEvent): Promise<LegacyNetlifyEvent> => {
+  if (isRequest(event)) {
+    const url = new URL(event.url);
+    return {
+      httpMethod: event.method,
+      path: url.pathname,
+      headers: Object.fromEntries(event.headers.entries()),
+      queryStringParameters: Object.fromEntries(url.searchParams.entries()),
+      body: await event.text(),
+      isBase64Encoded: false,
+      requestContext: { identity: { sourceIp: "127.0.0.1" } },
+    } as LegacyNetlifyEvent;
+  }
   if (!event.body) return event;
   const isBase64Encoded =
     event.isBase64Encoded === true || (event.isBase64Encoded as unknown) === "true";
@@ -29,5 +45,5 @@ export const handler = async (
   context: Parameters<typeof expressHandler>[1],
 ) => {
   await connectDatabase();
-  return expressHandler(normalizeEventBody(event), context);
+  return expressHandler(await normalizeEventBody(event), context);
 };
